@@ -656,6 +656,7 @@ function getToday() { return getLocaleDateStr(new Date()); }
 function getYesterday() { const d=new Date(); d.setDate(d.getDate()-1); return getLocaleDateStr(d); }
 function getCheckinDate() { return checkinDate==='today'?getToday():getYesterday(); }
 
+const DATA_VERSION = 3; // 数据版本号，更新硬编码数据时递增，自动清除旧缓存
 const INITIAL_DATA = {
   '哥': [
     {date:'2026/7/21',period:'上午',sport:'站桩',duration:15,time:'07:50',makeup:false,ts:0},
@@ -691,17 +692,20 @@ const INITIAL_DATA = {
     {date:'2026/8/7',period:'晚上',sport:'走路',duration:40,time:'20:00',makeup:false,ts:0},
     {date:'2026/8/8',period:'晚上',sport:'走路',duration:40,time:'20:00',makeup:false,ts:0},
     {date:'2026/8/9',period:'上午',sport:'打坐',duration:30,time:'09:00',makeup:false,ts:0},
-    {date:'2026/8/9',period:'晚上',sport:'走路',duration:40,time:'20:00',makeup:false,ts:0}
+    {date:'2026/8/9',period:'晚上',sport:'走路',duration:40,time:'20:00',makeup:false,ts:0},
+    {date:'2026/8/11',period:'晚上',sport:'走路',duration:40,time:'20:00',makeup:false,ts:0}
   ]
 };
 
 function getData() {
+  const ver = localStorage.getItem('health_checkin_ver');
   const d = localStorage.getItem('health_checkin_data');
-  if (d) { const parsed = JSON.parse(d); if (parsed['哥'] && parsed['妹'] && (parsed['哥'].length || parsed['妹'].length)) return parsed; }
+  if (ver == DATA_VERSION && d) { const parsed = JSON.parse(d); if (parsed['哥'] && parsed['妹'] && (parsed['哥'].length || parsed['妹'].length)) return parsed; }
+  localStorage.setItem('health_checkin_ver', DATA_VERSION);
   localStorage.setItem('health_checkin_data', JSON.stringify(INITIAL_DATA));
   return JSON.parse(JSON.stringify(INITIAL_DATA));
 }
-function saveData(data) { localStorage.setItem('health_checkin_data',JSON.stringify(data)); }
+function saveData(data) { localStorage.setItem('health_checkin_data',JSON.stringify(data)); localStorage.setItem('health_checkin_ver', DATA_VERSION); }
 
 function hasCheckedInThisPeriod(dateStr) {
   const data=getData(), records=data[currentUser]||[];
